@@ -5,12 +5,19 @@ Lightweight javaScript canvas engine with plugin capability. Small list of plugi
 ## Features
 
 - small core engine with
-	- start()
-	- stop()
-	- step(count)
-	- clear()
-	- destroy()
+  - start()
+  - stop()
+  - step(count)
+  - clear()
+  - destroy()
 - plugin support
+- predefined plugins
+  - fill
+  - filter
+  - file
+  - frameRate
+  - input
+  - stats
 
 ## Usage
 
@@ -20,17 +27,17 @@ Lightweight javaScript canvas engine with plugin capability. Small list of plugi
 <script src="cEnginen.js"></script>
 <script>
 
-	cEngine.create({
-		step: (context) => {
-			context.fillStyle = 'red'
-			context.fillRect(10, 10, 10, 10)
-		}
-	}).step() 
+  cEngine.create({
+    step: (context) => {
+      context.fillStyle = 'red'
+      context.fillRect(10, 10, 10, 10)
+    }
+  }).step() 
 
 </script>
 ```
 
-### Tiny Game with input plugin
+### Tiny game with input plugin
 
 ```html
 <script src="cEngine.js"></script>
@@ -57,7 +64,7 @@ Lightweight javaScript canvas engine with plugin capability. Small list of plugi
         }
       })
 
-      engine.start()
+  engine.start()
       
 </script>
 ```
