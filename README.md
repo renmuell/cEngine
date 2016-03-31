@@ -19,12 +19,14 @@ Lightweight javaScript canvas engine with plugin capability. Small list of plugi
 ```html
 <script src="cEnginen.js"></script>
 <script>
+
 	cEngine.create({
-	    step: (context) => {
-				context.fillStyle = 'red'
-			  context.fillRect(10, 10, 20, 20)
-	    }
-	  }).step() 
+		step: (context) => {
+			context.fillStyle = 'red'
+			context.fillRect(10, 10, 10, 10)
+		}
+	}).step() 
+
 </script>
 ```
 
