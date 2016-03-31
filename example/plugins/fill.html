@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>Example</title>
+  </head>
+  <body>
+
+    <script type="text/javascript" src="../../release/cEngine.js"></script>
+    <script type="text/javascript" src="../../release/plugins/cEngine.fill.js"></script>
+    <script type="text/javascript">
+
+      cEngine.create({
+        autoClear: true,
+        height: 50,
+        plugins: {
+          fill: cEngine.fill.create({
+            mode: 'stretch',
+            aspectRetion: true
+          })
+        },
+        step: function(context){
+          context.fillStyle = 'red'
+          context.fillRect(25, 25, 10, 10)
+        }
+      }).start()
+
+    </script>
+  </body>
+</html>

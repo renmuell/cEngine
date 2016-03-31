@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <title>Example</title>
+  </head>
+  <body>
+    <style>
+      canvas {
+        border: 1px solid #ccc;
+      }
+    </style>
+    <script type="text/javascript" src="../../release/cEngine.js"></script>
+    <script type="text/javascript" src="../../release/plugins/cEngine.stats.js"></script>
+    <script type="text/javascript" src="../../release/plugins/cEngine.filter.js"></script>
+    <script type="text/javascript">
+      var obj = { x: 50, y: 50 };
+
+      cEngine.create({
+        autoClear: true,
+        plugins: {
+          stats: cEngine.stats.create(),
+          filter: cEngine.filter.create({
+            filters: [{
+              Shader: cEngine.filter.Shader.greyscale
+            }]
+          })
+        },
+        step: function(context){
+          obj.x += (Math.random() - 0.5) * 10
+          obj.y += (Math.random() - 0.5) * 10
+
+          context.fillStyle = 'red'
+          context.fillRect(obj.x, obj.y, 10, 10)
+        }
+      }).start()
+
+    </script>
+  </body>
+</html>

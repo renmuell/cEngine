@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <title>Example</title>
+  </head>
+  <body>
+    <style>
+      canvas {
+        border: 1px solid #ccc;
+      }
+    </style>
+    <script type="text/javascript" src="../../release/cEngine.js"></script>
+    <script type="text/javascript" src="../../release/plugins/cEngine.frameRate.js"></script>
+    <form>
+      <span>Frame rate:</span><br/>
+      <input type="range" id="slider" min="1" max="60" value="5" onchange="slider_change(event)"></input>
+      <span id="output">5</span> fps<br/>
+    </form>
+    <script type="text/javascript">
+      var obj = { x: 50, y: 50 },
+
+          slider_change = function (event) {
+            document.querySelector('#output').innerHTML = event.currentTarget.value
+            engine.plugins.frameRate.setFps(event.currentTarget.value)
+          },
+          engine = cEngine.create({
+            autoClear: true,
+            plugins: {
+                frameRate: cEngine.frameRate.create({
+                  fps: document.querySelector('#slider').value
+                })
+            },
+            step: function(context){
+              obj.x += (Math.random() - 0.5) * 10
+              obj.y += (Math.random() - 0.5) * 10
+
+              context.fillStyle = 'red'
+              context.fillRect(obj.x, obj.y, 10, 10)
+            }
+          })
+
+          engine.start()
+
+    </script>
+  </body>
+</html>

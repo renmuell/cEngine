@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <title>Example</title>
+  </head>
+  <body>
+
+    <script type="text/javascript" src="../../release/cEngine.js"></script>
+    <script type="text/javascript" src="../../release/plugins/cEngine.__pluginTemplate__.js"></script>
+    <script type="text/javascript">
+
+      cEngine.create({
+        plugins: {
+          __name__: cEngine.__name__.create()
+        },
+        step: function(context, width, height, dt){
+           console.log('step', context, width, height, dt)
+        }
+      }).step()
+        .step(5)
+        .step()
+        .start()
+        .stop()
+        .destroy()
+
+    </script>
+  </body>
+</html>
