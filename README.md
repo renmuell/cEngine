@@ -1,2 +1,2 @@
-# canvasEngine
+# cEngine
 JavaScript Canvas Engine
