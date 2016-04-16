@@ -4,7 +4,7 @@ import './vendors/polyfils'
  *  Canvas engine with plugin capabilities.
  *  @param {object} global - window or this
  */
-((global) => {
+(function(global){
 
   /**
    *  Global namesapce
@@ -12,7 +12,7 @@ import './vendors/polyfils'
    */
   const cEngine = {
     
-    version: '0.1.3',
+    version: '0.1.5',
 
     /**
      *  Factory for a new cEninge instance.
@@ -20,61 +20,7 @@ import './vendors/polyfils'
      *  @param {object=} config - config for engine
      *  @return {object} eEngine instance
      */
-    create: (config) => {
-
-      /**
-       *  configurable engine values, with default values
-       */
-      const defaults = {
-
-        /**
-         *  parent dom element to attach to
-         *  @type {HTMLElement}
-         */
-        domElement: document.body,
-
-        /**
-         *  should canvas be cleared every step
-         *  @type {bool}
-         */
-        autoClear: false,
-
-        /**
-         *  callback for every step
-         *  @type {function}
-         */
-        step: undefined,
-
-        /**
-         *  canvas width
-         *  @type {number}
-         */
-        width: undefined,
-
-        /**
-         *  canvas height
-         *  @type {number}
-         */
-        height: undefined,
-
-        /**
-         *  should engine be stoped if page focus is lost
-         *  @type {bool}
-         */
-        stopOnUserLeave: false,
-
-        /**
-         *  style filter value
-         *  @type {string}
-         */
-        cssFilter: undefined,
-
-        /**
-         *  object containing all plugins
-         *  @type {object} 
-         */
-        plugins: {}
-      }
+    create: function (config) {
 
       /**
        *  The cEngine instance.
@@ -82,7 +28,7 @@ import './vendors/polyfils'
        *  @instance
        *  @type {object}
        */
-      const Engine = {
+      let Engine = {
 
         /**
          *  Time of last step
@@ -122,13 +68,20 @@ import './vendors/polyfils'
 
         /**
          *  shorthand list of all plugins
+         *  @type {array}
          */
         pluginList: [],
 
         /**
+         *  shorthand list of all plugins
+         *  @type {number}
+         */
+        requestAnimationFrameId: undefined,
+
+        /**
          *  Initialize canvas engine.
          */
-        init: () => {
+        init: function() {
           Engine.createDomElement()
           Engine.createPluginList()
           Engine.callPlugins('init', [Engine])
@@ -137,7 +90,7 @@ import './vendors/polyfils'
         /**
          *  Starts the engine by calling the loop.
          */
-        start: () => {
+        start: function() {
           Engine.isRunning = true
           Engine.callPlugins('start')
           Engine.loop()
@@ -146,79 +99,82 @@ import './vendors/polyfils'
         /**
          *  Stops the engine.
          */
-        stop: () => {
+        stop: function() {
           Engine.isRunning = false
+          
+          if (Engine.requestAnimationFrameId) {
+            window.cancelAnimationFrame(
+              Engine.requestAnimationFrameId);
+          }
+
           Engine.callPlugins('stop')
         },
 
         /**
          *  Hanlder for every loop step.
          */
-        stepFn: () => {
+        stepFn: function() {
           if (Engine.autoClear) { 
             Engine.clear()
           }
 
           Engine.callPlugins('preStep', [
             Engine.context, 
-            Engine.width, 
-            Engine.height, 
+            Engine.canvas.width, 
+            Engine.canvas.height, 
             Engine.stepTimeElapsed])
 
           Engine.step(
             Engine.context, 
-            Engine.width, 
-            Engine.height, 
+            Engine.canvas.width, 
+            Engine.canvas.height, 
             Engine.stepTimeElapsed)
 
           Engine.callPlugins('postStep', [
             Engine.context, 
-            Engine.width, 
-            Engine.height, 
+            Engine.canvas.width, 
+            Engine.canvas.height, 
             Engine.stepTimeElapsed])
         },
 
         /**
          *  Clears the canvas context.
          */
-        clear: () => {
-          Engine.context.clearRect(0, 0, Engine.width, Engine.height)
+        clear: function() {
+          Engine.context.clearRect(0, 0, Engine.canvas.width, Engine.canvas.height)
         },
 
         /**
          *  Engine loop.
          */
-        loop: () => {
+        loop: function() {
           if (Engine.isRunning) {
 
             Engine.stepTimeNow = new Date().getTime()
-            Engine.stepTimeElapsed = Engine.stepTimeNow - Engine.stepTimeThen
+            Engine.stepTimeElapsed 
+              = Engine.stepTimeNow - Engine.stepTimeThen
 
             Engine.stepFn()
 
             Engine.stepTimeThen = Engine.stepTimeNow 
 
-            requestAnimationFrame(Engine.loop)
+            Engine.requestAnimationFrameId 
+              = window.requestAnimationFrame(Engine.loop)
           }
         },
 
         /**
          *  Initialize Canvas and attach to dom element.
          */
-        createDomElement: () => {
+        createDomElement: function() {
           Engine.canvas = document.createElement('canvas')
 
           Engine.domElement.appendChild(Engine.canvas)
 
           Engine.context = Engine.canvas.getContext('2d')
 
-          if (Engine.cssFilter) {
-            Engine.canvas.style.webkitFilter = Engine.cssFilter
-            Engine.canvas.style.filter = Engine.cssFilter
-          }
-
-          if (Engine.stopOnUserLeave) {
-            window.onblur = () => Engine.stop()
+          if (Engine.style) {
+            Engine.setStyle(Engine.style)
           }
 
           Engine.resizeTo(Engine.width  || Engine.canvas.width,
@@ -229,9 +185,19 @@ import './vendors/polyfils'
          *  Remove all engine garbage so garbage collection can 
          *  clear all and Dom is clean.
          */
-        destroy: () => {
-          Engine.canvas.remove()
+        destroy: function() {
           Engine.callPlugins('destroy')
+          Engine.canvas.remove()
+        },
+
+        /**
+         *  Set Canvas Style.
+         *  @param {object} style - style
+         */
+        setStyle: function(style) {
+          for (const property in style){
+            Engine.canvas.style[property] = style[property]
+          }
         },
 
         /**
@@ -239,7 +205,7 @@ import './vendors/polyfils'
          *  @param {number} width - width
          *  @param {number} height - height
          */
-        resizeTo: (width, height) => {
+        resizeTo: function(width, height) {
           Engine.width = Engine.canvas.width = width
           Engine.height = Engine.canvas.height = height
         },
@@ -249,10 +215,10 @@ import './vendors/polyfils'
          *  @param {string} fn - function name
          *  @param {array} params - array of all call arguments
          */
-        callPlugins: (fn, params) => {
+        callPlugins: function(fn, params) {
           Engine.pluginList.forEach((plugin) => {
             if (plugin[fn]) {
-               plugin[fn].apply(undefined, params)
+              plugin[fn].apply(undefined, params)
             }
           })
         },
@@ -260,7 +226,7 @@ import './vendors/polyfils'
         /**
          *  Create shorthand plugin list for faster access.
          */
-        createPluginList: () => {
+        createPluginList: function() {
           for (const plugin in Engine.plugins) {
              if (Engine.plugins.hasOwnProperty(plugin) 
               && typeof Engine.plugins[plugin] != 'undefined'
@@ -273,7 +239,51 @@ import './vendors/polyfils'
         }
       }
 
-      Object.assign(Engine, defaults, config)
+      Object.assign(Engine, {
+
+        /**
+         *  parent dom element to attach to
+         *  @type {HTMLElement}
+         */
+        domElement: document.body,
+
+        /**
+         *  should canvas be cleared every step
+         *  @type {bool}
+         */
+        autoClear: false,
+
+        /**
+         *  callback for every step
+         *  @type {function}
+         */
+        step: undefined,
+
+        /**
+         *  canvas width
+         *  @type {number}
+         */
+        width: undefined,
+
+        /**
+         *  canvas height
+         *  @type {number}
+         */
+        height: undefined,
+
+        /**
+         *  canvas style
+         *  @type {object}
+         */
+        style: undefined,
+
+        /**
+         *  object containing all plugins
+         *  @type {object} 
+         */
+        plugins: {}
+
+      }, config)
 
       Engine.init()
 
@@ -293,17 +303,18 @@ import './vendors/polyfils'
          *  Stop engine.
          *  @return {object} engine instance
          */
-        stop: () => {
+        stop: function() {
           Engine.stop()
           return _public_
         },
 
         /**
-         *  Calls engine step one time or how many time count param says.
+         *  Calls engine step one time or how 
+         *  many time count param says.
          *  @param {number} [count=2] - how many steps
          *  @return {object} engine instance
          */
-        step: (count) => {
+        step: function(count) {
           if (count && count > 1) {
          
             Engine.stepFn()
@@ -320,7 +331,7 @@ import './vendors/polyfils'
          *  Starts engine.
          *  @return {object} engine instance
          */
-        start: () => {
+        start: function() {
           Engine.start()
           return _public_
         },
@@ -329,18 +340,18 @@ import './vendors/polyfils'
          *  Clears Context of engine.
          *  @return {object} engine instance
          */
-        clear: () => {
+        clear: function() {
           Engine.clear()
           return _public_
         },
 
         /**
          *  Destoys engine.
-         *  @return {object} engine instance
          */
-        destroy: () => {
+        destroy: function() {
+          Engine.stop()
           Engine.destroy()
-          return _public_
+          Engine = undefined
         }
       }
 
@@ -349,12 +360,14 @@ import './vendors/polyfils'
 
     /**
      *  Extend cEngine with plugin.
-     *  @param {string} id - id of plugin, eg 'filter' -> cEngine.filter
+     *  @param {string} id - id of plugin, 
+     *    eg 'filter' -> cEngine.filter
      *  @param {object} plugin - plugin
      *  @throws {Error} error
      */
     extend: (id, plugin) => {
-      if (typeof id === 'undefined' || typeof plugin === 'undefined') {
+      if (typeof id === 'undefined' 
+        || typeof plugin === 'undefined') {
 
         throw new Error('id or plugin is undefined!')  
 
@@ -364,9 +377,10 @@ import './vendors/polyfils'
 
       } else if (cEngine[id]) {
 
-        throw new Error('skiped cEngine-plugin [' + id + ']. ' + 
-                        'Maybe already attached or uses intern blocked ' +
-                        'name like "create", "extend" or "version"!')   
+        throw new Error(
+          'skiped cEngine-plugin [' + id + ']. ' + 
+          'Maybe already attached or uses intern blocked ' +
+          'name like "create", "extend" or "version"!')   
 
       } else if ( typeof plugin.create === 'undefined') {
      
@@ -380,4 +394,4 @@ import './vendors/polyfils'
 
   global.cEngine = cEngine
 
-})(typeof window !== 'undefined' ? window : this)
+}(typeof window !== 'undefined' ? window : this))

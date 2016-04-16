@@ -6,13 +6,16 @@
 (function (cEngine) {
 
   cEngine.extend('fill', {
-    version: '0.0.1',
+
     create: function create(config) {
       config = config || {};
 
       var fill = {
 
-        cEnginePlugin: true,
+        cEnginePlugin: {
+          name: 'fill',
+          version: '0.0.1'
+        },
 
         /**
          *  // full, stretch 
@@ -44,17 +47,12 @@
 
           if (fill.mode === 'fill') {
 
-            window.addEventListener('resize', function () {
-              return fill.resizeTo();
-            }, false);
-
+            window.addEventListener('resize', fill.resizeTo, false);
             fill.resizeTo();
           } else {
 
             if (fill.aspectRetion) {
-              window.addEventListener('resize', function () {
-                return fill.resizeToRatio();
-              }, false);
+              window.addEventListener('resize', fill.resizeToRatio, false);
               fill.resizeToRatio();
             }
 
@@ -74,6 +72,11 @@
               engine.height = engine.domElement.clientHeight;
             }
           }
+        },
+
+        destroy: function destroy() {
+          window.removeEventListener('resize', fill.resizeTo, false);
+          window.removeEventListener('resize', fill.resizeToRatio, false);
         },
 
         resizeToRatio: function resizeToRatio() {

@@ -10,12 +10,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 (function (cEngine) {
 
   cEngine.extend('stats', {
-    version: '0.0.1',
+
     create: function create(config) {
       config = config || {};
 
       var stats = {
-        cEnginePlugin: true,
+        cEnginePlugin: {
+          name: 'stats',
+          version: '0.0.1'
+        },
         stats: undefined,
         tempLoop: undefined,
         init: function init() {
@@ -33,6 +36,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         },
         postStep: function postStep() {
           stats.stats.end();
+        },
+        destroy: function destroy() {
+          stats.stats.end();
+          stats.stats.domElement.remove();
         }
       };
 

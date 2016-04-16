@@ -1,0 +1,51 @@
+<html>
+  <head>
+    <title>Example</title>
+  </head>
+  <body>
+
+    <script type="text/javascript" src="../release/cEngine.js"></script>
+    <script type="text/javascript" src="../release/plugins/cEngine.activityTracker.js"></script>
+    <script type="text/javascript">
+
+      function start(){
+        var engine = cEngine.create({
+          plugins: {
+            activityTracker: cEngine.activityTracker.create({
+               stopOnUserLeave: true
+            })
+
+            // fill: cEngine.fill.create({
+            //   mode: 'stretch',
+            //   aspectRetion: true
+            // }),
+            // filter: cEngine.filter.create({
+            //   filters: [{
+            //     Shader: cEngine.filter.Shader.negative
+            //   }, {
+            //     Convolver: cEngine.filter.Convolver.sharpen
+            //   }]
+            // }),
+            // file: cEngine.file.create(),
+            // frameRate: cEngine.frameRate.create({
+            //   fps: 30
+            // }),
+            // input: cEngine.input.create(),
+            // stats: cEngine.stats.create(),
+          },
+          step: function(context, width, height, dt){
+            context.fillStyle = 'red'
+            context.fillRect(10, 10, 10, 10)            
+          }
+        }).step()
+          .step(5)
+          .step()
+          .start()
+          .stop()
+          .destroy()
+        engine = undefined;
+      }
+
+    </script>
+  </body>
+</html>

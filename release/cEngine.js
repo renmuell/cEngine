@@ -15,7 +15,7 @@ require('./vendors/polyfils');
    */
   var cEngine = {
 
-    version: '0.1.3',
+    version: '0.1.5',
 
     /**
      *  Factory for a new cEninge instance.
@@ -24,60 +24,6 @@ require('./vendors/polyfils');
      *  @return {object} eEngine instance
      */
     create: function create(config) {
-
-      /**
-       *  configurable engine values, with default values
-       */
-      var defaults = {
-
-        /**
-         *  parent dom element to attach to
-         *  @type {HTMLElement}
-         */
-        domElement: document.body,
-
-        /**
-         *  should canvas be cleared every step
-         *  @type {bool}
-         */
-        autoClear: false,
-
-        /**
-         *  callback for every step
-         *  @type {function}
-         */
-        step: undefined,
-
-        /**
-         *  canvas width
-         *  @type {number}
-         */
-        width: undefined,
-
-        /**
-         *  canvas height
-         *  @type {number}
-         */
-        height: undefined,
-
-        /**
-         *  should engine be stoped if page focus is lost
-         *  @type {bool}
-         */
-        stopOnUserLeave: false,
-
-        /**
-         *  style filter value
-         *  @type {string}
-         */
-        cssFilter: undefined,
-
-        /**
-         *  object containing all plugins
-         *  @type {object} 
-         */
-        plugins: {}
-      };
 
       /**
        *  The cEngine instance.
@@ -125,8 +71,15 @@ require('./vendors/polyfils');
 
         /**
          *  shorthand list of all plugins
+         *  @type {array}
          */
         pluginList: [],
+
+        /**
+         *  shorthand list of all plugins
+         *  @type {number}
+         */
+        requestAnimationFrameId: undefined,
 
         /**
          *  Initialize canvas engine.
@@ -151,6 +104,11 @@ require('./vendors/polyfils');
          */
         stop: function stop() {
           Engine.isRunning = false;
+
+          if (Engine.requestAnimationFrameId) {
+            window.cancelAnimationFrame(Engine.requestAnimationFrameId);
+          }
+
           Engine.callPlugins('stop');
         },
 
@@ -162,18 +120,18 @@ require('./vendors/polyfils');
             Engine.clear();
           }
 
-          Engine.callPlugins('preStep', [Engine.context, Engine.width, Engine.height, Engine.stepTimeElapsed]);
+          Engine.callPlugins('preStep', [Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed]);
 
-          Engine.step(Engine.context, Engine.width, Engine.height, Engine.stepTimeElapsed);
+          Engine.step(Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed);
 
-          Engine.callPlugins('postStep', [Engine.context, Engine.width, Engine.height, Engine.stepTimeElapsed]);
+          Engine.callPlugins('postStep', [Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed]);
         },
 
         /**
          *  Clears the canvas context.
          */
         clear: function clear() {
-          Engine.context.clearRect(0, 0, Engine.width, Engine.height);
+          Engine.context.clearRect(0, 0, Engine.canvas.width, Engine.canvas.height);
         },
 
         /**
@@ -189,7 +147,7 @@ require('./vendors/polyfils');
 
             Engine.stepTimeThen = Engine.stepTimeNow;
 
-            requestAnimationFrame(Engine.loop);
+            Engine.requestAnimationFrameId = window.requestAnimationFrame(Engine.loop);
           }
         },
 
@@ -203,15 +161,8 @@ require('./vendors/polyfils');
 
           Engine.context = Engine.canvas.getContext('2d');
 
-          if (Engine.cssFilter) {
-            Engine.canvas.style.webkitFilter = Engine.cssFilter;
-            Engine.canvas.style.filter = Engine.cssFilter;
-          }
-
-          if (Engine.stopOnUserLeave) {
-            window.onblur = function () {
-              return Engine.stop();
-            };
+          if (Engine.style) {
+            Engine.setStyle(Engine.style);
           }
 
           Engine.resizeTo(Engine.width || Engine.canvas.width, Engine.height || Engine.canvas.height);
@@ -222,8 +173,18 @@ require('./vendors/polyfils');
          *  clear all and Dom is clean.
          */
         destroy: function destroy() {
-          Engine.canvas.remove();
           Engine.callPlugins('destroy');
+          Engine.canvas.remove();
+        },
+
+        /**
+         *  Set Canvas Style.
+         *  @param {object} style - style
+         */
+        setStyle: function setStyle(style) {
+          for (var property in style) {
+            Engine.canvas.style[property] = style[property];
+          }
         },
 
         /**
@@ -262,7 +223,51 @@ require('./vendors/polyfils');
         }
       };
 
-      Object.assign(Engine, defaults, config);
+      Object.assign(Engine, {
+
+        /**
+         *  parent dom element to attach to
+         *  @type {HTMLElement}
+         */
+        domElement: document.body,
+
+        /**
+         *  should canvas be cleared every step
+         *  @type {bool}
+         */
+        autoClear: false,
+
+        /**
+         *  callback for every step
+         *  @type {function}
+         */
+        step: undefined,
+
+        /**
+         *  canvas width
+         *  @type {number}
+         */
+        width: undefined,
+
+        /**
+         *  canvas height
+         *  @type {number}
+         */
+        height: undefined,
+
+        /**
+         *  canvas style
+         *  @type {object}
+         */
+        style: undefined,
+
+        /**
+         *  object containing all plugins
+         *  @type {object} 
+         */
+        plugins: {}
+
+      }, config);
 
       Engine.init();
 
@@ -288,7 +293,8 @@ require('./vendors/polyfils');
         },
 
         /**
-         *  Calls engine step one time or how many time count param says.
+         *  Calls engine step one time or how 
+         *  many time count param says.
          *  @param {number} [count=2] - how many steps
          *  @return {object} engine instance
          */
@@ -324,11 +330,11 @@ require('./vendors/polyfils');
 
         /**
          *  Destoys engine.
-         *  @return {object} engine instance
          */
         destroy: function destroy() {
+          Engine.stop();
           Engine.destroy();
-          return _public_;
+          Engine = undefined;
         }
       };
 
@@ -337,7 +343,8 @@ require('./vendors/polyfils');
 
     /**
      *  Extend cEngine with plugin.
-     *  @param {string} id - id of plugin, eg 'filter' -> cEngine.filter
+     *  @param {string} id - id of plugin, 
+     *    eg 'filter' -> cEngine.filter
      *  @param {object} plugin - plugin
      *  @throws {Error} error
      */

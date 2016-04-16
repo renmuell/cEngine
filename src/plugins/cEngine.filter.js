@@ -5,11 +5,14 @@
 (function(cEngine){
 
   cEngine.extend('filter', {
-    version: '0.0.3',
+
     create: function(config) {
 
       var filter = {
-        cEnginePlugin: true,
+        cEnginePlugin: {
+          name: 'filter',
+          version: '0.0.3'          
+        },
         list: config.filters || [],
 
         postStep: function(context, width, height){

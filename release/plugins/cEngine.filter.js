@@ -8,11 +8,14 @@
 (function (cEngine) {
 
   cEngine.extend('filter', {
-    version: '0.0.3',
+
     create: function create(config) {
 
       var filter = {
-        cEnginePlugin: true,
+        cEnginePlugin: {
+          name: 'filter',
+          version: '0.0.3'
+        },
         list: config.filters || [],
 
         postStep: function postStep(context, width, height) {

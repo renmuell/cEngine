@@ -1,59 +1,97 @@
 /*global cEngine */
 
 import FileSaver from '../vendors/FileSaver'
-
 import '../vendors/canvas-toBlob'
 
-(function(cEngine){
+/**
+ *  File - cEngine Plugin
+ *
+ *  Saving canvas as image or loading 
+ *  image into the canvas.
+ *
+ *  USE
+ *    cEngine.file.saveToFile() 
+ *    cEngine.file.loadFile()   
+ */
+((cEngine) => {
 
   cEngine.extend('file', {
-    version: '0.0.1',
-    create: function(){
 
-      var file = {
-        cEnginePlugin: true,
+    create: () => {
+
+      const file = {
+
+        cEnginePlugin: {
+          name: 'file',
+          version: '0.0.1'
+        },
+
+        /**
+         *  Engine instance
+         *  @type {object}
+         */
         engine: undefined,
+        
+        /**
+         *  File input element
+         *  @type {HTMLElement}
+         */
         fileInput: undefined,
-        init: function(engine){
-          file.engine = engine;
-          file.fileInput = document.createElement('input');
-          file.fileInput.type="file";
-          file.fileInput.style.visibility = 'hidden';
-          document.body.appendChild(file.fileInput);
 
-          file.fileInput.onclick = function () {
-            this.value = null;
-          };
+        init: (engine) => {
 
-          file.fileInput.onchange = function () {
+          file.engine = engine
 
-            var fr = new FileReader();
-            fr.onload = function(){
-              var img = new Image();
-              img.onload = function(){
-                file.engine.clear();
-                file.engine.resizeTo(img.width, img.height);
-                file.engine.canvas.getContext("2d").drawImage(img,0,0);
-              };
-              img.src = fr.result;
-            };
+          file.fileInput = document.createElement('input')
+          file.fileInput.type="file"
+          file.fileInput.style.visibility = 'hidden'
+          file.fileInput.onchange = () => {
 
-            fr.readAsDataURL(file.fileInput.files[0]);
+            const fr = new FileReader()
+           
+            fr.onload = () => {
 
-          };
+              const img = new Image()
+
+              img.onload = () => {
+                file.engine.clear()
+                file.engine.resizeTo(img.width, img.height)
+                file.engine.canvas.getContext("2d").drawImage(img,0,0)
+              }
+
+              img.src = fr.result
+            }
+
+            fr.readAsDataURL(file.fileInput.files[0])
+          }
+
+          document.body.appendChild(file.fileInput)
         },
-        saveToFile: function(name){
-          file.engine.canvas.toBlob(function(blob) {
-            FileSaver.saveAs(blob, name);
-          });
+
+        destroy: () => {
+          file.fileInput.remove()
         },
-        loadFile: function(){
-          file.fileInput.click();
+
+        /**
+         *  Save canvas to file.
+         *  @param {string} name - file name
+         */
+        saveToFile: (name) => {
+          file.engine.canvas.toBlob((blob) => {
+            FileSaver.saveAs(blob, name)
+          })
+        },
+     
+        /**
+         *  Load file into canvas.
+         */   
+        loadFile: () => {
+          file.fileInput.click()
         }
-      };
+      }
 
-      return file;
+      return file
     }    
-  });
+  })
 
-}(cEngine));
+})(cEngine)

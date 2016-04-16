@@ -1,54 +1,109 @@
 /*global cEngine */
 
+import Hammer from '../vendors/hammer.min'
+import '../vendors/hammer-time.min'
+
 ((cEngine) => {
 
   const inputPlugin = {
-    version: '0.0.3',
-    create: () => {
+
+    create: (config) => {
+      config = config || {}
 
       const input  = {
-        cEnginePlugin: true,
+
+        cEnginePlugin: {
+          name: 'inputPlugin',
+          version: '0.0.3'          
+        },
+
         engine: undefined,
         keys: {},
-        clicks: [],
-        mousemove: [],
+
+        onTap       : config.onTap       || function(){},
+        onPan       : config.onPan       || function(){},
+
+        hammerManager: undefined,
+        gestures: {
+          singleTap : undefined,
+          pan       : undefined
+        },
+
         init: (engine) => {
           input.engine = engine
-          input.engine.canvas.addEventListener('click', (event) => {
-            input.clicks.push(event)
+
+          input.setupHammer()
+
+          window.document.addEventListener('keydown', input.onKeydown)
+          window.document.addEventListener('keyup', input.onKeyup)
+        },
+        
+        setupHammer: () => {
+          input.hammerManager = new Hammer.Manager(input.engine.domElement)
+
+          input.hammerManager.add(new Hammer.Tap({
+            event: 'singleTap'
+          }))
+
+          input.hammerManager.add(new Hammer.Pan({
+            event: 'pan'
+          }))
+
+          input.hammerManager.get('singleTap').recognizeWith('pan')
+
+          input.hammerManager.on('singleTap', (ev) => { 
+            input.gestures.singleTap = ev.center
           })
 
-          input.engine.canvas.addEventListener('mousemove', (event) => {
-            if (Math.random()> 0.92) {
-              input.mousemove.push(event)
-            }
-          })
-
-          window.document.addEventListener('keydown', (event) => {
-            input.keys[inputPlugin.KeyCode[event.keyCode]] = true
-          })
-
-          window.document.addEventListener('keyup', (event) => {
-            input.keys[inputPlugin.KeyCode[event.keyCode]] = false
+          input.hammerManager.on('pan', (ev) => {
+            input.gestures.pan = ev.center
           })
         },
+
+        postStep: () => {
+          if(input.gestures.singleTap){
+            input.onTap(
+              input.getCanvasPosition(
+                input.gestures.singleTap))
+
+            input.gestures.singleTap = undefined
+          }
+
+          if(input.gestures.pan){
+            input.onPan(
+              input.getCanvasPosition(
+                input.gestures.pan))
+
+            input.gestures.pan = undefined
+          }
+        },
+
         destroy: () => {
-
+          input.hammerManager.destroy()
+          window.document.removeEventListener('keydown', input.onKeydown)
+          window.document.removeEventListener('keyup', input.onKeyup)
         },
+
+        onKeydown: (event) => {
+          input.keys[inputPlugin.KeyCode[event.keyCode]] = true
+        },
+
+        onKeyup: (event) => {
+          input.keys[inputPlugin.KeyCode[event.keyCode]] = false
+        },
+
         getCanvasPosition: (event) => {
-          let rect = input.engine.canvas.getBoundingClientRect(),
-              x = event.clientX - rect.left,
-              y = event.clientY - rect.top
+          let rect = input.engine.canvas.getBoundingClientRect()
+            
+          event.x = event.x - rect.left,
+          event.y = event.y - rect.top
 
-            if (input.engine.useResolutionDevider) {
-              x = x/input.engine.resolutionDevider
-              y = y/input.engine.resolutionDevider
-            }
+          if (input.engine.useResolutionDevider) {
+            event.x = event.x/input.engine.resolutionDevider
+            event.y = event.y/input.engine.resolutionDevider
+          }
 
-            return {
-              x: x,
-              y: y
-            }
+          return event
         }
       }
 

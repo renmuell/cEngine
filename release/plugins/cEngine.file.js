@@ -9,50 +9,90 @@ require('../vendors/canvas-toBlob');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/**
+ *  File - cEngine Plugin
+ *
+ *  Saving canvas as image or loading 
+ *  image into the canvas.
+ *
+ *  USE
+ *    cEngine.file.saveToFile() 
+ *    cEngine.file.loadFile()   
+ */
 /*global cEngine */
 
 (function (cEngine) {
 
   cEngine.extend('file', {
-    version: '0.0.1',
+
     create: function create() {
 
       var file = {
-        cEnginePlugin: true,
+
+        cEnginePlugin: {
+          name: 'file',
+          version: '0.0.1'
+        },
+
+        /**
+         *  Engine instance
+         *  @type {object}
+         */
         engine: undefined,
+
+        /**
+         *  File input element
+         *  @type {HTMLElement}
+         */
         fileInput: undefined,
+
         init: function init(engine) {
+
           file.engine = engine;
+
           file.fileInput = document.createElement('input');
           file.fileInput.type = "file";
           file.fileInput.style.visibility = 'hidden';
-          document.body.appendChild(file.fileInput);
-
-          file.fileInput.onclick = function () {
-            this.value = null;
-          };
-
           file.fileInput.onchange = function () {
 
             var fr = new FileReader();
+
             fr.onload = function () {
+
               var img = new Image();
+
               img.onload = function () {
                 file.engine.clear();
                 file.engine.resizeTo(img.width, img.height);
                 file.engine.canvas.getContext("2d").drawImage(img, 0, 0);
               };
+
               img.src = fr.result;
             };
 
             fr.readAsDataURL(file.fileInput.files[0]);
           };
+
+          document.body.appendChild(file.fileInput);
         },
+
+        destroy: function destroy() {
+          file.fileInput.remove();
+        },
+
+        /**
+         *  Save canvas to file.
+         *  @param {string} name - file name
+         */
         saveToFile: function saveToFile(name) {
           file.engine.canvas.toBlob(function (blob) {
             _FileSaver2.default.saveAs(blob, name);
           });
         },
+
+        /**
+         *  Load file into canvas.
+         */
         loadFile: function loadFile() {
           file.fileInput.click();
         }

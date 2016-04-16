@@ -3,13 +3,16 @@
 ((cEngine) => {
 
   cEngine.extend('fill', {
-    version: '0.0.1',
+
     create: (config) => {
       config = config || {}
 
       const fill = {
 
-        cEnginePlugin: true,
+        cEnginePlugin: {
+          name: 'fill',
+          version: '0.0.1'          
+        },
 
         /**
          *  // full, stretch 
@@ -41,14 +44,13 @@
 
           if (fill.mode === 'fill') {
 
-            window.addEventListener('resize', () => fill.resizeTo(), false)
-            
+            window.addEventListener('resize', fill.resizeTo, false)
             fill.resizeTo()
 
           } else {
 
             if (fill.aspectRetion) {
-              window.addEventListener('resize', () => fill.resizeToRatio(), false)
+              window.addEventListener('resize', fill.resizeToRatio, false)
               fill.resizeToRatio()
             }
 
@@ -70,9 +72,14 @@
           }
         },
 
+        destroy: () => {
+          window.removeEventListener('resize', fill.resizeTo, false)
+          window.removeEventListener('resize', fill.resizeToRatio, false)
+        },
+
         resizeToRatio: () => {
           const ratio = fill.engine.domElement.clientWidth / fill.engine.domElement.clientHeight
-
+          
           fill.engine.canvas.height = fill.initHeight
           fill.engine.canvas.width = fill.engine.canvas.height * ratio
 

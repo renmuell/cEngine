@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <title>Example</title>
+  </head>
+  <body>
+
+    <script type="text/javascript" src="../../release/cEngine.js"></script>
+    <script type="text/javascript" src="../../release/plugins/cEngine.activityTracker.js"></script>
+    <script type="text/javascript">
+
+      var engine = cEngine.create({
+        plugins: {
+          activityTracker: cEngine.activityTracker.create({
+            stopOnUserLeave: true
+          })
+        },
+        autoClear: true,
+        step: function(context, width, height, dt){
+          context.fillStyle = 'red'
+          context.fillRect(Math.random()*20, Math.random()*20, 10, 10)
+        }
+      }).start()
+
+    </script>
+  </body>
+</html>

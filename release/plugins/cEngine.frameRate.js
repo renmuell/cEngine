@@ -7,14 +7,15 @@
 
   cEngine.extend('frameRate', {
 
-    version: '0.0.1',
-
     create: function create(config) {
       config = config || {};
 
       var frameRate = {
 
-        cEnginePlugin: true,
+        cEnginePlugin: {
+          name: 'frameRate',
+          version: '0.0.1'
+        },
 
         fps: config.fps || 60,
 
