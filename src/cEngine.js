@@ -12,6 +12,10 @@ import './vendors/polyfils'
    */
   const cEngine = {
     
+    /**
+     *  The version.
+     *  @type {string}
+     */
     version: '0.1.5',
 
     /**
@@ -34,19 +38,19 @@ import './vendors/polyfils'
          *  Time of last step
          *  @type {date}
          */
-        stepTimeThen: undefined,
+        stepTimeThen: 0,
 
         /**
          *  Time of step
          *  @type {date}
          */
-        stepTimeNow: undefined,
+        stepTimeNow: 0,
 
         /**
          *  Elapsed time since last step
          *  @type {number}
          */
-        stepTimeElapsed: undefined,
+        stepTimeElapsed: 0,
         
         /**
          *  is engine running
@@ -92,6 +96,9 @@ import './vendors/polyfils'
          */
         start: function() {
           Engine.isRunning = true
+          Engine.stepTimeElapsed = 0
+          Engine.stepTimeNow = 0
+          Engine.stepTimeThen = 0
           Engine.callPlugins('start')
           Engine.loop()
         },
@@ -101,7 +108,10 @@ import './vendors/polyfils'
          */
         stop: function() {
           Engine.isRunning = false
-          
+          Engine.stepTimeElapsed = 0
+          Engine.stepTimeNow = 0
+          Engine.stepTimeThen = 0
+
           if (Engine.requestAnimationFrameId) {
             window.cancelAnimationFrame(
               Engine.requestAnimationFrameId);
@@ -114,6 +124,14 @@ import './vendors/polyfils'
          *  Hanlder for every loop step.
          */
         stepFn: function() {
+
+          Engine.stepTimeNow = new Date().getTime()
+
+          if (Engine.stepTimeThen !== 0) {
+            Engine.stepTimeElapsed 
+              = Engine.stepTimeNow - Engine.stepTimeThen
+          }
+
           if (Engine.autoClear) { 
             Engine.clear()
           }
@@ -124,7 +142,8 @@ import './vendors/polyfils'
             Engine.canvas.height, 
             Engine.stepTimeElapsed])
 
-          Engine.step(
+          Engine.step.call(
+            _public_,
             Engine.context, 
             Engine.canvas.width, 
             Engine.canvas.height, 
@@ -135,13 +154,19 @@ import './vendors/polyfils'
             Engine.canvas.width, 
             Engine.canvas.height, 
             Engine.stepTimeElapsed])
+
+           Engine.stepTimeThen = Engine.stepTimeNow 
         },
 
         /**
          *  Clears the canvas context.
          */
         clear: function() {
-          Engine.context.clearRect(0, 0, Engine.canvas.width, Engine.canvas.height)
+          Engine.context.clearRect(
+            0, 
+            0, 
+            Engine.canvas.width, 
+            Engine.canvas.height)
         },
 
         /**
@@ -150,13 +175,7 @@ import './vendors/polyfils'
         loop: function() {
           if (Engine.isRunning) {
 
-            Engine.stepTimeNow = new Date().getTime()
-            Engine.stepTimeElapsed 
-              = Engine.stepTimeNow - Engine.stepTimeThen
-
             Engine.stepFn()
-
-            Engine.stepTimeThen = Engine.stepTimeNow 
 
             Engine.requestAnimationFrameId 
               = window.requestAnimationFrame(Engine.loop)

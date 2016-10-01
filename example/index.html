@@ -8,9 +8,9 @@
     <script type="text/javascript">
 
       var engine = cEngine.create({
-        stopOnUserLeave: true,
-        step: (context) => {
+        step: function (context) {
           context.fillStyle = 'red'
+          console.log(this)
           context.fillRect(10, 10, 10, 10)
         }
       }).step() 

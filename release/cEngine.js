@@ -15,6 +15,10 @@ require('./vendors/polyfils');
    */
   var cEngine = {
 
+    /**
+     *  The version.
+     *  @type {string}
+     */
     version: '0.1.5',
 
     /**
@@ -122,7 +126,7 @@ require('./vendors/polyfils');
 
           Engine.callPlugins('preStep', [Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed]);
 
-          Engine.step(Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed);
+          Engine.step.call(_public_, Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed);
 
           Engine.callPlugins('postStep', [Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed]);
         },
