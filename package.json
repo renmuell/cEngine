@@ -1,6 +1,6 @@
 {
   "name": "cengine",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "JavaScript Canvas Engine",
   "main": "canvasEngine.js",
   "scripts": {
@@ -17,9 +17,37 @@
     "engine"
   ],
   "files": [
-    "release/cEngine.js",
-    "release/cEngine-min.js",
-    "release/cEngine-min.js.map",
+    "dist/plugins/cEngine.activityTracker-min.js",
+    "dist/plugins/cEngine.activityTracker.js.map",
+    "dist/plugins/cEngine.activityTracker.js",
+
+    "dist/plugins/cEngine.file-min.js",
+    "dist/plugins/cEngine.file.js.map",
+    "dist/plugins/cEngine.file.js",
+
+    "dist/plugins/cEngine.fill-min.js",
+    "dist/plugins/cEngine.fill.js.map",
+    "dist/plugins/cEngine.fill.js",
+
+    "dist/plugins/cEngine.filter-min.js",
+    "dist/plugins/cEngine.filter.js.map",
+    "dist/plugins/cEngine.filter.js",
+
+    "dist/plugins/cEngine.frameRate-min.js",
+    "dist/plugins/cEngine.frameRate.js.map",
+    "dist/plugins/cEngine.frameRate.js",
+
+    "dist/plugins/cEngine.input-min.js",
+    "dist/plugins/cEngine.input.js.map",
+    "dist/plugins/cEngine.input.js",
+
+    "dist/plugins/cEngine.stats-min.js",
+    "dist/plugins/cEngine.stats.js.map",
+    "dist/plugins/cEngine.stats.js",
+
+    "dist/cEngine.js",
+    "dist/cEngine-min.js",
+    "dist/cEngine-min.js.map",
     "LICENSE"
   ],
   "author": "Rene Müller <rene.mueller.code@gmail.com>",

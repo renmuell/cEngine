@@ -26,8 +26,8 @@ const path = {
     testHtml : 'build/test/**/*.html'
   },
   release : {
-    main    : './release/',
-    plugins : './release/plugins'
+    main    : './dist/',
+    plugins : './dist/plugins'
   }
 }
 
