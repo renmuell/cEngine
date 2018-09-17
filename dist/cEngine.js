@@ -19,7 +19,7 @@ require('./vendors/polyfils');
      *  The version.
      *  @type {string}
      */
-    version: '0.1.5',
+    version: '0.1.8',
 
     /**
      *  Factory for a new cEninge instance.
