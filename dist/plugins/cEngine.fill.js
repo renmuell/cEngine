@@ -1,9 +1,30 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';
+"use strict";
 
 /*global cEngine */
 
 (function (cEngine) {
+
+  (function () {
+    var throttle = function throttle(type, name, obj) {
+      obj = obj || window;
+      var running = false;
+      var func = function func() {
+        if (running) {
+          return;
+        }
+        running = true;
+        requestAnimationFrame(function () {
+          obj.dispatchEvent(new CustomEvent(name));
+          running = false;
+        });
+      };
+      obj.addEventListener(type, func);
+    };
+
+    /* init - you can init any event */
+    throttle("resize", "optimizedResize");
+  })();
 
   cEngine.extend('fill', {
 
@@ -14,7 +35,7 @@
 
         cEnginePlugin: {
           name: 'fill',
-          version: '0.0.1'
+          version: '0.0.2'
         },
 
         /**
@@ -47,12 +68,12 @@
 
           if (fill.mode === 'fill') {
 
-            window.addEventListener('resize', fill.resizeTo, false);
+            window.addEventListener('optimizedResize', fill.resizeTo, false);
             fill.resizeTo();
           } else {
 
             if (fill.aspectRetion) {
-              window.addEventListener('resize', fill.resizeToRatio, false);
+              window.addEventListener('optimizedResize', fill.resizeToRatio, false);
               fill.resizeToRatio();
             }
 
@@ -75,8 +96,8 @@
         },
 
         destroy: function destroy() {
-          window.removeEventListener('resize', fill.resizeTo, false);
-          window.removeEventListener('resize', fill.resizeToRatio, false);
+          window.removeEventListener('optimizedResize', fill.resizeTo, false);
+          window.removeEventListener('optimizedResize', fill.resizeToRatio, false);
         },
 
         resizeToRatio: function resizeToRatio() {

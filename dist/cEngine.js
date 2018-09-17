@@ -41,19 +41,19 @@ require('./vendors/polyfils');
          *  Time of last step
          *  @type {date}
          */
-        stepTimeThen: undefined,
+        stepTimeThen: 0,
 
         /**
          *  Time of step
          *  @type {date}
          */
-        stepTimeNow: undefined,
+        stepTimeNow: 0,
 
         /**
          *  Elapsed time since last step
          *  @type {number}
          */
-        stepTimeElapsed: undefined,
+        stepTimeElapsed: 0,
 
         /**
          *  is engine running
@@ -99,6 +99,9 @@ require('./vendors/polyfils');
          */
         start: function start() {
           Engine.isRunning = true;
+          Engine.stepTimeElapsed = 0;
+          Engine.stepTimeNow = 0;
+          Engine.stepTimeThen = 0;
           Engine.callPlugins('start');
           Engine.loop();
         },
@@ -108,6 +111,9 @@ require('./vendors/polyfils');
          */
         stop: function stop() {
           Engine.isRunning = false;
+          Engine.stepTimeElapsed = 0;
+          Engine.stepTimeNow = 0;
+          Engine.stepTimeThen = 0;
 
           if (Engine.requestAnimationFrameId) {
             window.cancelAnimationFrame(Engine.requestAnimationFrameId);
@@ -120,6 +126,13 @@ require('./vendors/polyfils');
          *  Hanlder for every loop step.
          */
         stepFn: function stepFn() {
+
+          Engine.stepTimeNow = new Date().getTime();
+
+          if (Engine.stepTimeThen !== 0) {
+            Engine.stepTimeElapsed = Engine.stepTimeNow - Engine.stepTimeThen;
+          }
+
           if (Engine.autoClear) {
             Engine.clear();
           }
@@ -129,6 +142,8 @@ require('./vendors/polyfils');
           Engine.step.call(_public_, Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed);
 
           Engine.callPlugins('postStep', [Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed]);
+
+          Engine.stepTimeThen = Engine.stepTimeNow;
         },
 
         /**
@@ -144,12 +159,7 @@ require('./vendors/polyfils');
         loop: function loop() {
           if (Engine.isRunning) {
 
-            Engine.stepTimeNow = new Date().getTime();
-            Engine.stepTimeElapsed = Engine.stepTimeNow - Engine.stepTimeThen;
-
             Engine.stepFn();
-
-            Engine.stepTimeThen = Engine.stepTimeNow;
 
             Engine.requestAnimationFrameId = window.requestAnimationFrame(Engine.loop);
           }

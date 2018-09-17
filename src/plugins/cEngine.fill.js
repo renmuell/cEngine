@@ -2,6 +2,26 @@
 
 ((cEngine) => {
 
+  (function() {
+    var throttle = function(type, name, obj) {
+        obj = obj || window;
+        var running = false;
+        var func = function() {
+            if (running) { return; }
+            running = true;
+             requestAnimationFrame(function() {
+                obj.dispatchEvent(new CustomEvent(name));
+                running = false;
+            });
+        };
+        obj.addEventListener(type, func);
+    };
+
+      /* init - you can init any event */
+      throttle("resize", "optimizedResize");
+  })();
+
+
   cEngine.extend('fill', {
 
     create: (config) => {
@@ -11,7 +31,7 @@
 
         cEnginePlugin: {
           name: 'fill',
-          version: '0.0.1'          
+          version: '0.0.2'          
         },
 
         /**
@@ -44,13 +64,13 @@
 
           if (fill.mode === 'fill') {
 
-            window.addEventListener('resize', fill.resizeTo, false)
+            window.addEventListener('optimizedResize', fill.resizeTo, false)
             fill.resizeTo()
 
           } else {
 
             if (fill.aspectRetion) {
-              window.addEventListener('resize', fill.resizeToRatio, false)
+              window.addEventListener('optimizedResize', fill.resizeToRatio, false)
               fill.resizeToRatio()
             }
 
@@ -73,8 +93,8 @@
         },
 
         destroy: () => {
-          window.removeEventListener('resize', fill.resizeTo, false)
-          window.removeEventListener('resize', fill.resizeToRatio, false)
+          window.removeEventListener('optimizedResize', fill.resizeTo, false)
+          window.removeEventListener('optimizedResize', fill.resizeToRatio, false)
         },
 
         resizeToRatio: () => {
