@@ -1,8 +1,5 @@
 /*global cEngine */
 
-import Hammer from '../vendors/hammer.min'
-import '../vendors/hammer-time.min'
-
 ((cEngine) => {
 
   const inputPlugin = {
@@ -14,74 +11,91 @@ import '../vendors/hammer-time.min'
 
         cEnginePlugin: {
           name: 'inputPlugin',
-          version: '0.0.3'          
+          version: '0.0.4'          
         },
+
+        onTouch: config.onTouch || function(){},
 
         engine: undefined,
         keys: {},
-
-        onTap       : config.onTap       || function(){},
-        onPan       : config.onPan       || function(){},
-
-        hammerManager: undefined,
-        gestures: {
-          singleTap : undefined,
-          pan       : undefined
-        },
+        touches: [], 
+        mouseIsTouching: false,
+        mouseTouch: undefined,
 
         init: (engine) => {
           input.engine = engine
 
-          input.setupHammer()
+          input.engine.canvas.addEventListener('touchmove', input.touchmove)
+          input.engine.canvas.addEventListener('touchstart', input.touchmove)
+
+          input.engine.canvas.addEventListener('mousemove', input.mousemove)
+          input.engine.canvas.addEventListener('mousedown', input.mousedown)
+          window.document.addEventListener('mouseup', input.mouseup)
 
           window.document.addEventListener('keydown', input.onKeydown)
           window.document.addEventListener('keyup', input.onKeyup)
         },
         
-        setupHammer: () => {
-          input.hammerManager = new Hammer.Manager(input.engine.domElement)
-
-          input.hammerManager.add(new Hammer.Tap({
-            event: 'singleTap'
-          }))
-
-          input.hammerManager.add(new Hammer.Pan({
-            event: 'pan'
-          }))
-
-          input.hammerManager.get('singleTap').recognizeWith('pan')
-
-          input.hammerManager.on('singleTap', (ev) => { 
-            input.gestures.singleTap = ev.center
-          })
-
-          input.hammerManager.on('pan', (ev) => {
-            input.gestures.pan = ev.center
-          })
-        },
-
+  
         postStep: () => {
-          if(input.gestures.singleTap){
-            input.onTap(
-              input.getCanvasPosition(
-                input.gestures.singleTap))
-
-            input.gestures.singleTap = undefined
+          if (input.mouseTouch) {
+            input.onTouch(input.getCanvasPosition(input.mouseTouch))
+            input.mouseTouch = undefined
           }
 
-          if(input.gestures.pan){
-            input.onPan(
-              input.getCanvasPosition(
-                input.gestures.pan))
-
-            input.gestures.pan = undefined
+          if (input.touches.length > 0) {
+            for (let index = 0; index < input.touches.length; index++) {
+              input.onTouch(input.getCanvasPosition(input.touches[index]))
+            }
+            input.touches = []
           }
         },
 
         destroy: () => {
-          input.hammerManager.destroy()
+          input.engine.canvas.removeEventListener('mousemove', input.mousemove)
+          input.engine.canvas.removeEventListener('mousedown', input.mousedown)
+          window.document.removeEventListener('mouseup', input.mouseup)
+          input.engine.canvas.removeEventListener('touchstart', input.touchmove)
+          input.engine.canvas.removeEventListener('touchmove', input.touchmove)
           window.document.removeEventListener('keydown', input.onKeydown)
           window.document.removeEventListener('keyup', input.onKeyup)
+        },
+
+        mousedown: (event) => {
+          if (event.which == 1) {
+            event.preventDefault()
+            event.stopImmediatePropagation()
+            input.mouseIsTouching = true
+            input.mouseTouch = event
+            return false
+          }
+        },
+  
+        mousemove: (event) => {
+          if (event.which == 1) {
+            event.preventDefault()
+            event.stopImmediatePropagation()
+            if (input.mouseIsTouching)
+              input.mouseTouch = event
+            return false
+          }
+        },
+
+        mouseup: (event) => {
+          if (event.which == 1) {
+            event.preventDefault()
+            event.stopImmediatePropagation()
+            input.mouseTouch = event
+            input.mouseIsTouching = false
+            return false
+          }
+        },
+
+        touchmove: (event) => {
+          event.preventDefault()
+          event.stopImmediatePropagation()
+          input.touches = event.targetTouches
+          return false
         },
 
         onKeydown: (event) => {
@@ -94,16 +108,17 @@ import '../vendors/hammer-time.min'
 
         getCanvasPosition: (event) => {
           let rect = input.engine.canvas.getBoundingClientRect()
-            
-          event.x = event.x - rect.left,
-          event.y = event.y - rect.top
-
-          if (input.engine.useResolutionDevider) {
-            event.x = event.x/input.engine.resolutionDevider
-            event.y = event.y/input.engine.resolutionDevider
+          let newEvent = {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
           }
 
-          return event
+          if (input.engine.useResolutionDevider) {
+            newEvent.x = newEvent.x/input.engine.resolutionDevider
+            newEvent.y = newEvent.y/input.engine.resolutionDevider
+          }
+
+          return newEvent
         }
       }
 
