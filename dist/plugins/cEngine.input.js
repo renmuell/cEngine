@@ -16,7 +16,7 @@
 
         cEnginePlugin: {
           name: 'inputPlugin',
-          version: '0.0.5'
+          version: '0.0.6'
         },
         engine: undefined,
         keys: {},
@@ -139,8 +139,8 @@
           var rect = input.engine.canvas.getBoundingClientRect();
           var newTouch = {
             identifier: touch.identifier,
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
+            x: touch.clientX - rect.left,
+            y: touch.clientY - rect.top
           };
 
           if (input.engine.useResolutionDevider) {
