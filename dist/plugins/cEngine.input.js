@@ -5,6 +5,8 @@
 
 (function (cEngine) {
 
+  var MOUSE_LEFT_TOUCH = "MOUSE_LEFT_TOUCH";
+
   var inputPlugin = {
 
     create: function create(config) {
@@ -14,51 +16,38 @@
 
         cEnginePlugin: {
           name: 'inputPlugin',
-          version: '0.0.4'
+          version: '0.0.5'
         },
-
-        onTouch: config.onTouch || function () {},
-
         engine: undefined,
         keys: {},
         touches: [],
-        mouseIsTouching: false,
-        mouseTouch: undefined,
 
         init: function init(engine) {
           input.engine = engine;
 
+          input.engine.canvas.addEventListener('touchstart', input.touchstart);
           input.engine.canvas.addEventListener('touchmove', input.touchmove);
-          input.engine.canvas.addEventListener('touchstart', input.touchmove);
+          input.engine.canvas.addEventListener('touchend', input.touchend);
+          input.engine.canvas.addEventListener('touchcancel', input.touchend);
 
-          input.engine.canvas.addEventListener('mousemove', input.mousemove);
           input.engine.canvas.addEventListener('mousedown', input.mousedown);
+          input.engine.canvas.addEventListener('mousemove', input.mousemove);
           window.document.addEventListener('mouseup', input.mouseup);
 
           window.document.addEventListener('keydown', input.onKeydown);
           window.document.addEventListener('keyup', input.onKeyup);
         },
 
-        postStep: function postStep() {
-          if (input.mouseTouch) {
-            input.onTouch(input.getCanvasPosition(input.mouseTouch));
-            input.mouseTouch = undefined;
-          }
-
-          if (input.touches.length > 0) {
-            for (var index = 0; index < input.touches.length; index++) {
-              input.onTouch(input.getCanvasPosition(input.touches[index]));
-            }
-            input.touches = [];
-          }
-        },
-
         destroy: function destroy() {
-          input.engine.canvas.removeEventListener('mousemove', input.mousemove);
-          input.engine.canvas.removeEventListener('mousedown', input.mousedown);
-          window.document.removeEventListener('mouseup', input.mouseup);
-          input.engine.canvas.removeEventListener('touchstart', input.touchmove);
+          input.engine.canvas.removeEventListener('touchstart', input.touchstart);
           input.engine.canvas.removeEventListener('touchmove', input.touchmove);
+          input.engine.canvas.removeEventListener('touchend', input.touchend);
+          input.engine.canvas.removeEventListener('touchcancel', input.touchend);
+
+          input.engine.canvas.removeEventListener('mousedown', input.mousedown);
+          input.engine.canvas.removeEventListener('mousemove', input.mousemove);
+          window.document.removeEventListener('mouseup', input.mouseup);
+
           window.document.removeEventListener('keydown', input.onKeydown);
           window.document.removeEventListener('keyup', input.onKeyup);
         },
@@ -66,37 +55,76 @@
         mousedown: function mousedown(event) {
           if (event.which == 1) {
             event.preventDefault();
-            event.stopImmediatePropagation();
             input.mouseIsTouching = true;
-            input.mouseTouch = event;
-            return false;
+            event.identifier = MOUSE_LEFT_TOUCH;
+            input.touches.push(input.createTouch(event));
           }
         },
 
         mousemove: function mousemove(event) {
           if (event.which == 1) {
             event.preventDefault();
-            event.stopImmediatePropagation();
-            if (input.mouseIsTouching) input.mouseTouch = event;
-            return false;
+            if (input.mouseIsTouching) {
+              event.identifier = MOUSE_LEFT_TOUCH;
+              var idx = input.ongoingTouchIndexById(event.identifier);
+              if (idx >= 0) {
+                input.touches.splice(idx, 1, input.createTouch(event)); // swap in the new touch record
+              }
+            }
           }
         },
 
         mouseup: function mouseup(event) {
           if (event.which == 1) {
             event.preventDefault();
-            event.stopImmediatePropagation();
-            input.mouseTouch = event;
             input.mouseIsTouching = false;
-            return false;
+            event.identifier = MOUSE_LEFT_TOUCH;
+            var idx = input.ongoingTouchIndexById(event.identifier);
+            if (idx >= 0) {
+              input.touches.splice(idx, 1); // remove it; we're done
+            }
+          }
+        },
+
+        touchstart: function touchstart(event) {
+          event.preventDefault();
+          var touches = event.changedTouches;
+          for (var i = 0; i < touches.length; i++) {
+            input.touches.push(input.createTouch(touches[i]));
           }
         },
 
         touchmove: function touchmove(event) {
           event.preventDefault();
-          event.stopImmediatePropagation();
-          input.touches = event.targetTouches;
-          return false;
+          var touches = event.changedTouches;
+          for (var i = 0; i < touches.length; i++) {
+            var idx = input.ongoingTouchIndexById(touches[i].identifier);
+            if (idx >= 0) {
+              input.touches.splice(idx, 1, input.createTouch(touches[i])); // swap in the new touch record
+            }
+          }
+        },
+
+        touchend: function touchend(event) {
+          event.preventDefault();
+          var touches = event.changedTouches;
+          for (var i = 0; i < touches.length; i++) {
+            var idx = input.ongoingTouchIndexById(touches[i].identifier);
+            if (idx >= 0) {
+              input.touches.splice(idx, 1); // remove it; we're done
+            }
+          }
+        },
+
+        ongoingTouchIndexById: function ongoingTouchIndexById(idToFind) {
+          for (var i = 0; i < input.touches.length; i++) {
+            var id = input.touches[i].identifier;
+
+            if (id == idToFind) {
+              return i;
+            }
+          }
+          return -1; // not found
         },
 
         onKeydown: function onKeydown(event) {
@@ -107,19 +135,20 @@
           input.keys[inputPlugin.KeyCode[event.keyCode]] = false;
         },
 
-        getCanvasPosition: function getCanvasPosition(event) {
+        createTouch: function createTouch(touch) {
           var rect = input.engine.canvas.getBoundingClientRect();
-          var newEvent = {
+          var newTouch = {
+            identifier: touch.identifier,
             x: event.clientX - rect.left,
             y: event.clientY - rect.top
           };
 
           if (input.engine.useResolutionDevider) {
-            newEvent.x = newEvent.x / input.engine.resolutionDevider;
-            newEvent.y = newEvent.y / input.engine.resolutionDevider;
+            newTouch.x = newTouch.x / input.engine.resolutionDevider;
+            newTouch.y = newTouch.y / input.engine.resolutionDevider;
           }
 
-          return newEvent;
+          return newTouch;
         }
       };
 

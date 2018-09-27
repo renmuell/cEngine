@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Overview Example</title>
+	<meta charset="utf8"/>
+	<style>
+
+		html, body {
+			font-family:Arial, Helvetica, sans-serif;
+			margin:0;
+			padding:0;
+		}
+
+		main{
+			padding: 0 20px;
+			width: 700px;
+			overflow: hidden;
+			max-width: 100%;
+			margin: 0 auto;
+			box-sizing: border-box;
+		} 
+		iframe {
+			border:none;
+			width:100%;
+			height: 400px;
+			margin:10px;
+		}
+		code {
+			line-height: 18px;
+    		font-size: 14px;	
+		}
+	</style>
+</head>
+<body>
+<main>
+	<h1>cEngine.js</h1>
+	<hr>
+	<p>
+		Welcome! cEngine.js is a small canvas-engine for javascript. This page features examples for the core engine, as well as the plugins included.
+	</p>
+	<hr>
+	<h2>1. Simple canvas drawing</h2>
+	<hr>
+	<p>
+		In this example, we create a new instance of cEngine.js and run one step to draw a square.
+	</p>
+	<hr>
+	<a href="simple.html">Go to the simple canvas drawing example ></a>
+	<hr>
+	<pre><code>
+var engine = cEngine.create({
+  step: function (context) {
+    context.fillStyle = 'red'
+    console.log(this)
+    context.fillRect(10, 10, 10, 10)
+  }
+}).step() 	
+	</code></pre>
+	<hr>
+	<iframe src="simple.html"></iframe>
+	<hr>
+
+	<h2>2. Plugin activityTracker</h2>
+	<hr>
+	<p>
+		This example features the activityTracker, which stops the engine when the user loses focus of the window. This plugin will restart the engine when the user focuses on the window.
+	</p>
+	<hr>
+	<a href="plugins/activityTracker.html">Go to the activityTracker example ></a>
+	<hr>
+	<pre><code>
+var engine = cEngine.create({
+  plugins: {
+    activityTracker: cEngine.activityTracker.create({
+      stopOnUserLeave: true
+    })
+  },
+  autoClear: true,
+  step: function(context, width, height, dt){
+    context.fillStyle = 'red'
+    context.fillRect(Math.random()*20, Math.random()*20, 10, 10)
+  }
+}).start()
+	</code></pre>
+	<hr>
+	<iframe src="plugins/activityTracker.html"></iframe>
+	<hr>
+
+	<h2>3. Plugin fill</h2>
+	<hr>
+	<a href="plugins/fill.html">Go to fill example ></a>
+	<hr>
+	<pre><code>
+var engine = cEngine.create({
+  autoClear: true,
+  height: 512,
+  plugins: {
+    fill: cEngine.fill.create({
+      mode: 'stretch',
+      aspectRetion: true
+    })
+  },
+  step: function(context, width, height){
+    context.fillStyle = context.fillStyle === 'red' ? 'blue': 'red'
+    context.fillRect(width * Math.random(), height * Math.random(), 10, 10)
+  }
+})
+
+engine.start()
+	</code></pre>
+	<hr>
+	<iframe src="plugins/fill.html"></iframe>
+	<hr>
+
+	<h2>Plugin filter</h2>
+	<hr>
+	<a href="plugins/filter.html">Go to filter example ></a>
+	<hr>
+	<p>Code see example page</p>
+	<hr>
+	<iframe src="plugins/filter.html"></iframe>
+	<hr>
+	
+	<h2>Filter-App</h2>
+	<hr>
+	<a href="plugins/filterApp.html">Go to Filter-App ></a>
+	<hr>
+	<iframe src="plugins/filterApp.html"></iframe>
+	<hr>
+
+	<h2>Plugin frameRate</h2>
+	<hr>
+	<a href="plugins/frameRate.html">Go to frameRate example ></a>
+	<hr>
+	<p>Code see example page</p>
+	<hr>
+	<iframe src="plugins/frameRate.html"></iframe>
+	<hr>
+
+	<h2>Plugin input</h2>
+	<hr>
+	<a href="plugins/input.html">Go to input example ></a>
+	<hr>
+	<p>Code see example page</p>
+	<hr>
+	<iframe src="plugins/input.html"></iframe>
+	<hr>
+
+	<h2>Plugin stats</h2>
+	<hr>
+	<a href="plugins/stats.html">Go to stats example ></a>
+	<hr>
+	<pre><code>
+var obj = { x: 50, y: 50 };
+
+var engine = cEngine.create({
+  autoClear: true,
+  plugins: {
+    stats: cEngine.stats.create(),
+    filter: cEngine.filter.create({
+      filters: [{
+        Shader: cEngine.filter.Shader.greyscale
+      }]
+    })
+  },
+  step: function(context){
+    obj.x += (Math.random() - 0.5) * 10
+    obj.y += (Math.random() - 0.5) * 10
+    context.fillStyle = 'red'
+    context.fillRect(obj.x, obj.y, 10, 10)
+  }
+}).start()
+	</code></pre>
+	<hr>
+	<iframe src="plugins/stats.html"></iframe>
+	<hr>
+	<p>
+		Coded with love by Rene Müller, see more at <a href="https://renmuell.github.io/">https://renmuell.github.io/</a>.
+	</p>
+</main>
+</body>
+</html>

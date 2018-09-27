@@ -16,7 +16,7 @@ import './vendors/polyfils'
      *  The version.
      *  @type {string}
      */
-    version: '0.1.9',
+    version: '0.1.10',
 
     /**
      *  Factory for a new cEninge instance.
@@ -147,7 +147,8 @@ import './vendors/polyfils'
             Engine.context, 
             Engine.canvas.width, 
             Engine.canvas.height, 
-            Engine.stepTimeElapsed)
+            Engine.stepTimeElapsed,
+            Engine.plugins)
 
           Engine.callPlugins('postStep', [
             Engine.context, 

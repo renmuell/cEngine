@@ -19,7 +19,7 @@ require('./vendors/polyfils');
      *  The version.
      *  @type {string}
      */
-    version: '0.1.9',
+    version: '0.1.10',
 
     /**
      *  Factory for a new cEninge instance.
@@ -139,7 +139,7 @@ require('./vendors/polyfils');
 
           Engine.callPlugins('preStep', [Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed]);
 
-          Engine.step.call(_public_, Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed);
+          Engine.step.call(_public_, Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed, Engine.plugins);
 
           Engine.callPlugins('postStep', [Engine.context, Engine.canvas.width, Engine.canvas.height, Engine.stepTimeElapsed]);
 

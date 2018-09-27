@@ -14,14 +14,14 @@ const path = {
   src : {
     cEngine  : './src/cEngine.js',
     plugins  : './src/plugins/**/*.js',
-    example  : './example/**/*.*',
+    example  : './docs/**/*.*',
     test     : './test/**/*.js',
     testHtml : './test/**/*.html'
   },
   build : {
     src      : './build/src',
     plugins  : './build/src/plugins',
-    example  : './build/example',
+    example  : './build/docs',
     test     : './build/test',
     testHtml : 'build/test/**/*.html'
   },
@@ -98,7 +98,7 @@ gulp.task('release-js-plugins', () =>
 
 gulp.task('copy-example', () =>
     gulp.src(path.src.example)
-        .pipe(replace(/\/release\//g, '/src/'))
+        .pipe(replace(/\/dist\//g, '/src/'))
         .pipe(gulp.dest(path.build.example)))
 
 // Test
