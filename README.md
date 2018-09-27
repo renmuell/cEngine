@@ -71,7 +71,7 @@ Lightweight javaScript canvas engine with plugin capability. Small list of plugi
 
 ## Examples
 
-Browse them locally in the examples directory
+Browse them on http://renmuell.github.io/cEngine/
 
 ## License
 
