@@ -16,7 +16,8 @@ const path = {
     plugins  : './src/plugins/**/*.js',
     example  : './docs/**/*.*',
     test     : './test/**/*.js',
-    testHtml : './test/**/*.html'
+    testHtml : './test/**/*.html',
+    release  : './dist/**/*.*'
   },
   build : {
     src      : './build/src',
@@ -27,7 +28,9 @@ const path = {
   },
   release : {
     main    : './dist/',
-    plugins : './dist/plugins'
+    plugins : './dist/plugins',
+    example : './docs/',
+    exampleDist : './docs/dist/'
   }
 }
 
@@ -98,8 +101,13 @@ gulp.task('release-js-plugins', () =>
 
 gulp.task('copy-example', () =>
     gulp.src(path.src.example)
-        .pipe(replace(/\/dist\//g, '/src/'))
+        .pipe(replace(/dist\//g, '../src/'))
         .pipe(gulp.dest(path.build.example)))
+
+
+gulp.task('copy-example-dist', ['release-js'] , () =>
+  gulp.src(path.src.release)
+      .pipe(gulp.dest(path.release.exampleDist)))
 
 // Test
 
@@ -130,4 +138,4 @@ gulp.task('default', ['build-js'])
 
 gulp.task('build', ['copy-example', 'build-js'])
 
-gulp.task('release', ['test', 'release-js'])
+gulp.task('release', ['test', 'copy-example-dist'])
