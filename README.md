@@ -1,6 +1,6 @@
 # cEngine.js
 
-Lightweight javaScript canvas engine with plugin capability. Small list of plugins included.
+Lightweight JavaScript canvas engine with plugin capability.
 
 ## Features
 
