@@ -1,6 +1,6 @@
 {
   "name": "cengine",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "JavaScript Canvas Engine",
   "main": "canvasEngine.js",
   "scripts": {

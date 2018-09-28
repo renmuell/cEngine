@@ -16,7 +16,7 @@
 
         cEnginePlugin: {
           name: 'inputPlugin',
-          version: '0.0.6'
+          version: '0.0.7'
         },
         engine: undefined,
         keys: {},
@@ -26,12 +26,12 @@
           input.engine = engine;
 
           input.engine.canvas.addEventListener('touchstart', input.touchstart);
-          input.engine.canvas.addEventListener('touchmove', input.touchmove);
-          input.engine.canvas.addEventListener('touchend', input.touchend);
-          input.engine.canvas.addEventListener('touchcancel', input.touchend);
+          window.document.addEventListener('touchmove', input.touchmove);
+          window.document.addEventListener('touchend', input.touchend);
+          window.document.addEventListener('touchcancel', input.touchend);
 
           input.engine.canvas.addEventListener('mousedown', input.mousedown);
-          input.engine.canvas.addEventListener('mousemove', input.mousemove);
+          window.document.addEventListener('mousemove', input.mousemove);
           window.document.addEventListener('mouseup', input.mouseup);
 
           window.document.addEventListener('keydown', input.onKeydown);
@@ -40,12 +40,12 @@
 
         destroy: function destroy() {
           input.engine.canvas.removeEventListener('touchstart', input.touchstart);
-          input.engine.canvas.removeEventListener('touchmove', input.touchmove);
-          input.engine.canvas.removeEventListener('touchend', input.touchend);
-          input.engine.canvas.removeEventListener('touchcancel', input.touchend);
+          window.document.removeEventListener('touchmove', input.touchmove);
+          window.document.removeEventListener('touchend', input.touchend);
+          window.document.removeEventListener('touchcancel', input.touchend);
 
           input.engine.canvas.removeEventListener('mousedown', input.mousedown);
-          input.engine.canvas.removeEventListener('mousemove', input.mousemove);
+          window.document.removeEventListener('mousemove', input.mousemove);
           window.document.removeEventListener('mouseup', input.mouseup);
 
           window.document.removeEventListener('keydown', input.onKeydown);
