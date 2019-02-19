@@ -13,7 +13,7 @@
 
         cEnginePlugin: {
           name: 'inputPlugin',
-          version: '0.0.7'          
+          version: '0.0.8'          
         },
         engine: undefined,
         keys: {},
@@ -22,15 +22,16 @@
         init: (engine) => {
           input.engine = engine
 
-          input.engine.canvas.addEventListener('touchstart', input.touchstart)
-          window.document.addEventListener('touchmove', input.touchmove)
-          window.document.addEventListener('touchend', input.touchend)
-          window.document.addEventListener('touchcancel', input.touchend)
-
-          input.engine.canvas.addEventListener('mousedown', input.mousedown)
-          window.document.addEventListener('mousemove', input.mousemove)
-          window.document.addEventListener('mouseup', input.mouseup)
-
+          if ('ontouchstart' in window) {
+            input.engine.canvas.addEventListener('touchstart', input.touchstart)
+            window.document.addEventListener('touchmove', input.touchmove)
+            window.document.addEventListener('touchend', input.touchend)
+            window.document.addEventListener('touchcancel', input.touchend)
+          } else {
+            input.engine.canvas.addEventListener('mousedown', input.mousedown)
+            window.document.addEventListener('mousemove', input.mousemove)
+            window.document.addEventListener('mouseup', input.mouseup)
+          }
           window.document.addEventListener('keydown', input.onKeydown)
           window.document.addEventListener('keyup', input.onKeyup)
         },
@@ -84,7 +85,6 @@
         },
 
         touchstart: (event) => {
-          event.preventDefault()
           var touches = event.changedTouches
           for (var i = 0; i < touches.length; i++) {
             input.touches.push(input.createTouch(touches[i]))
@@ -92,7 +92,6 @@
         },
 
         touchmove: (event) => {
-          event.preventDefault()
           var touches = event.changedTouches
           for (var i = 0; i < touches.length; i++) {
             var idx = input.ongoingTouchIndexById(touches[i].identifier)
@@ -103,7 +102,6 @@
         },
 
         touchend: (event) => {
-          event.preventDefault()
           var touches = event.changedTouches
           for (var i = 0; i < touches.length; i++) {
             var idx = input.ongoingTouchIndexById(touches[i].identifier)

@@ -8,6 +8,7 @@
     <script type="text/javascript" src="../dist/plugins/cEngine.input.js"></script>
     <form>
       <span>controls:</span><br/>
+      <a href="https://www.google.de">google</a>
        <p>w - a - s - d</p>
     </form>
     <script type="text/javascript">
@@ -17,6 +18,8 @@
             y: 0
           },
           engine = cEngine.create({
+            width: 500,
+            height: 500,
             autoClear: true,
             plugins: {
               input: cEngine.input.create()
